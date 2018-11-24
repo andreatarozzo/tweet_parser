@@ -6,39 +6,6 @@ import numpy as np
 class TweetParser(object):
 
     def __init__(self):
-        self.collector_full_tweet = {"tweet": [],
-                                     "tweet_length": [],
-                                     "hashtags": [],
-                                     "mentions": [],
-                                     "is_retweet": [],
-                                     "is_retweeted": [],
-                                     "retweet_count": [],
-                                     "reply_count": [],
-                                     "favorite_count": [],
-                                     "lang_tweet": [],
-                                     "source": [],
-                                     "user_name": [],
-                                     "user_verified": [],
-                                     "user_lang": [],
-                                     "user_description": [],
-                                     "user_follower_number": [],
-                                     "user_friends_number": [],
-                                     "user_favorites_count": [],
-                                     "user_statuses_count": [],
-                                     "user_set_location": [],
-                                     "location_city": [],
-                                     "location_country": [],
-                                     "country_code": [],
-                                     "geo_latitude": [],
-                                     "geo_longitude": [],
-                                     "created": [],
-                                     "created_date": [],
-                                     "created_min": [],
-                                     "created_hour": [],
-                                     "created_day": [],
-                                     "created_month": [],
-                                     "created_year": [],
-                                     }
         self.collector_tweet_data = {"tweet": [],
                                      "tweet_length": [],
                                      "hashtags": [],
@@ -59,6 +26,7 @@ class TweetParser(object):
                                      "created_min": [],
                                      "user_name": []
                                      }
+
         self.collector_users_data = {"user_name": [],
                                      "user_verified": [],
                                      "user_lang": [],
@@ -72,8 +40,12 @@ class TweetParser(object):
                                      "location_country": [],
                                      "country_code": [],
                                      "geo_latitude": [],
-                                     "geo_longitude": []
+                                     "geo_longitude": [],
+                                     "user_account_creation": []
                                      }
+
+        self.collector_full_tweet = {**self.collector_tweet_data, **self.collector_users_data}
+
 
     # The following 7 functions return the timestamps/date/year/month/day/hour/minute from a tweet
     @staticmethod
@@ -214,8 +186,8 @@ class TweetParser(object):
 
     def is_retweet(self, tweet):
         """
-        All the tweets that has been retweeted starts with "RT", exploiting this constant this function check
-        if the input is either a retweet or not.
+        All the tweets that has been re-tweeted starts with "RT", exploiting this constant this function check
+        if the input is either a re-tweet or not.
         """
         if "RT" == self.tweet_text(tweet)[0:2]:
             return True
@@ -350,9 +322,21 @@ class TweetParser(object):
 
         return result
 
+    @staticmethod
+    def __dtype_output_check(data, output_dtype):
+        if output_dtype == "dict":
+            return data
+
+        elif output_dtype == "tuple":
+            return tuple(data.values())
+
+        else:
+            raise ValueError("output_type is not valid, use 'dict' or 'tuple'")
+
     def tweet_data_only(self, t_input, output_type="dict"):
         """
-        This functions takes as an input a tweet or a collection of tweets and returns the most valuable information about it.
+        This functions takes as an input a tweet or a collection of tweets and returns the most valuable
+        information about it.
         :param t_input: tweet - dict type / tweets - iterable
         :param output_type: user can select the data type of the output: dict / tuple with only the values
         :return: a dict or a tuple with the most valuable info about the tweet/tweets but not the info
@@ -360,13 +344,8 @@ class TweetParser(object):
         """
         if type(t_input) is dict:
             result = self.__tweet_dict(t_input)
-
-            if output_type == "dict":
-                return result
-            elif output_type == "tuple":
-                return tuple(result.values())
-            else:
-                raise ValueError("output_type is not valid, use 'dict' or 'tuple'")
+            output = self.__dtype_output_check(result, output_type)
+            return output
 
         elif type(t_input) is list or type(t_input) is tuple:
             for tweet in t_input:
@@ -374,12 +353,8 @@ class TweetParser(object):
                 for key in result.keys():
                     self.collector_tweet_data[key].append(result[key])
 
-            if output_type == "dict":
-                return self.collector_tweet_data
-            elif output_type == "tuple":
-                return tuple(self.collector_tweet_data.values())
-            else:
-                raise ValueError("output_type is not valid, use 'dict' or 'tuple'")
+            output = self.__dtype_output_check(self.collector_tweet_data, output_type)
+            return output
 
         else:
             raise TypeError("input is not valid, try 'dict','list' or 'tuple'")
@@ -414,13 +389,8 @@ class TweetParser(object):
         """
         if type(t_input) is dict:
             result = self.__user_dict(t_input)
-
-            if output_type == "dict":
-                return result
-            elif output_type == "tuple":
-                return tuple(result.values())
-            else:
-                raise ValueError("output_type is not valid, use 'dict' or 'tuple'")
+            output = self.__dtype_output_check(result, output_type)
+            return output
 
         elif type(t_input) is list or type(t_input) is tuple:
             for tweet in t_input:
@@ -428,12 +398,8 @@ class TweetParser(object):
                 for key in result.keys():
                     self.collector_users_data[key].append(result[key])
 
-            if output_type == "dict":
-                return self.collector_users_data
-            elif output_type == "tuple":
-                return tuple(self.collector_users_data.values())
-            else:
-                raise ValueError("output_type is not valid, use 'dict' or 'tuple'")
+            output = self.__dtype_output_check(self.collector_users_data, output_type)
+            return output
 
         else:
             raise TypeError("input is not valid, try 'dict','list' or 'tuple'")
@@ -456,13 +422,8 @@ class TweetParser(object):
         """
         if type(t_input) is dict:
             result = self.__full_tweet_dict(t_input)
-
-            if output_type == "dict":
-                return result
-            elif output_type == "tuple":
-                return tuple(result.values())
-            else:
-                raise ValueError("output_type is not valid, use 'dict' or 'tuple'")
+            output = self.__dtype_output_check(result, output_type)
+            return output
 
         elif type(t_input) is list or type(t_input) is tuple:
             for tweet in t_input:
@@ -470,12 +431,9 @@ class TweetParser(object):
                 for key in result.keys():
                     self.collector_full_tweet[key].append(result[key])
 
-            if output_type == "dict":
-                return self.collector_full_tweet
-            elif output_type == "tuple":
-                return tuple(self.collector_full_tweet.values())
-            else:
-                raise ValueError("output_type is not valid, use 'dict' or 'tuple'")
+            output = self.__dtype_output_check(self.collector_full_tweet, output_type)
+            return output
 
         else:
             raise TypeError("input is not valid, try 'dict','list' or 'tuple'")
+
